@@ -11,7 +11,7 @@ export default class User extends Component {
     render() {
         return (
             <Main {...headerProps}>
-                Cadastro de usuários
+                Cadastro de usuários 2
             </Main>
         )
     }
