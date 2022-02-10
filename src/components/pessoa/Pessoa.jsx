@@ -1,6 +1,8 @@
 import React, { Component } from "react"
 import Main from "../templates/Main"
 import axios from "axios"
+import cors from "cors"
+
 
 const headerProps = {
     icon: 'users',
@@ -10,81 +12,104 @@ const headerProps = {
 
 const baseUrl = 'https://people-stage.herokuapp.com/v1/peoplesoft/pessoa'
 const initialState = {
-    pessoa: { nome: '', email: '' },
-    list: []
+    pessoa: {
+        nome: 'Ronaldinho',
+        email: 'ronaldo123@mala.com.br',
+        sobrenome: 'da Silva',
+        sexo: 'M',
+        cpf: '06847404000'
+    }
 }
 
 export default class Pessoa extends Component {
-
+    
     state = { ...initialState }
-
+    
     clear() {
         // limpar o formulario
         this.setState({ pessoa: initialState.pessoa })
     }
-
+    
     save() {
         // POST: pessoa
         const pessoa = this.state.pessoa
-        const method = pessoa.uuid ? 'PATCH' : 'POST'
+        const method = pessoa.uuid ? 'patch' : 'post'
         const url = pessoa.id ? `${baseUrl}/${pessoa.id}` : baseUrl
-
-        axios[method](url, pessoa).then(resp => {
-            const list = this.getUpdatedList(resp.data)
-            this.setState({ pessoa: initialState.pessoa, list })
+        
+        const testinho = this.testinho();
+        
+        axios.defaults.headers.post['Access-Control-Allow-Origin'] = '*';
+        const request = axios[method](url, pessoa, cors())
+        .then(function (response) {
+            console.log(response);
+            this.setState({ pessoa: initialState.pessoa })
         })
+        .catch(function (error) {
+            console.error(error);
+            });
     }
 
-    getUpdatedList(pessoa) {
-        const list = this.state.list.filter(p => p.id !== p.id)
-        // unshift é para colocar o novo item da lista como o primeiro da listagem
-        list.unshift(pessoa)
-        return list
+    async testinho() {
+        return axios.get("https://people-stage.herokuapp.com/v1/peoplesoft/pessoa/cpf/06847404000")
     }
 
     updateField(event) {
         const pessoa = { ...this.state.pessoa }
-        pessoa[event.target.nome] = event.target.value
+        pessoa[event.target.name] = event.target.value
         this.setState({ pessoa })
     }
 
     renderForm() {
         return (
             <>
-                <div className="form">
-                    <div className="row">
-                        <div className="mb-3">
-                            <div className="form-group">
-                                <label className="form-label">Nome</label>
-                                <input type="text" className="form-control"
-                                    name="nome"
-                                    value={this.state.pessoa.nome}
-                                    onChange={e => this.updateField(e)}
-                                    placeholder="Digite o nome ..." />
-                            </div>
-                        </div>
+                <form className="row g-3">
 
-                        <div className="mb-3">
-                            <label className="form-label">E-mail</label>
-                            <input type="text" className="form-control"
-                                name="email"
-                                value={this.state.pessoa.email}
-                                onChange={e => this.updateField(e)}
-                                placeholder="Digite o email" />
-                        </div>
+                    <div className="col-md-6">
+                        <label htmlFor="nome" className="form-label">Nome</label>
+                        <input type="text" className="form-control"
+                            name="nome"
+                            value={this.state.pessoa.nome}
+                            onChange={e => this.updateField(e)}
+                            placeholder="Digite o nome..." />
                     </div>
-                </div>
-                <hr />
-                <div className="row">
-                    <div className="col-12 d-flex justify-content-end">
-                        <button className="btn btn-primary" onClick={e => this.save(e)}>
-                            Salvar
-                        </button>
-                        <button className="btn btn-danger ml-2" onClick={e => this.clear(e)}>
-                            Cancelar
-                        </button>
+
+                    <div className="col-md-6">
+                        <label htmlFor="sobrenome" className="form-label">Sobrenome</label>
+                        <input type="text" className="form-control" id="sobrenome"
+                            name="sobrenome"
+                            value={this.state.pessoa.sobrenome}
+                            onChange={e => this.updateField(e)}
+                            placeholder="Digite o sobrenome" />
                     </div>
-                </div>
+                    <div className="col-md-6">
+                        <label htmlFor="email" className="form-label">Email</label>
+                        <input type="email" className="form-control" id="email"
+                            name="email"
+                            value={this.state.pessoa.email}
+                            onChange={e => this.updateField(e)}
+                            placeholder="Digite o email ..." />
+                    </div>
+                    <div className="col-md-6">
+                        <label htmlFor="cpf" className="form-label">CPF</label>
+                        <input type="text" className="form-control" id="cpf"
+                            name="cpf"
+                            value={this.state.pessoa.cpf}
+                            onChange={e => this.updateField(e)}
+                            placeholder="Digite o cpf" />
+                    </div>
+                    <div className="col-md-2">
+                        <label htmlFor="sexo" className="form-label">Sexo</label>
+                        <input type="text" className="form-control" id="sexo"
+                            name="sexo"
+                            value={this.state.pessoa.sexo}
+                            onChange={e => this.updateField(e)}
+                            placeholder="Digite o sexo" />
+                    </div>
+                    <div className="col-12">
+                        <button type="submit" className="btn btn-primary" onClick={e => this.save(e)}>Salvar</button>
+                        <button type="submit" className="btn btn-danger" onClick={e => this.clear(e)}>Cancelar</button>
+                    </div>
+                </form>
             </>
         )
     }
